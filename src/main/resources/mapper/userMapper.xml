@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.luoren.basis.mapper.UserMapper">
+
+    <resultMap id="userVO" type="top.luoren.basis.entity.vo.UserVO">
+        <result property="age" column="age" javaType="java.lang.Integer"/>
+        <result property="name" column="name" javaType="java.lang.String"/>
+        <result property="email" column="email" javaType="java.lang.String"/>
+    </resultMap>
+
+    <select id="listUser" resultType="top.luoren.basis.entity.User">
+        select * from user u
+        <where>
+            <if test="params !=null and params.key!=null">
+                u.name like concat('%',#{params.key},'%') or u.email like concat('%',#{params.key},'%')
+            </if>
+        </where>
+
+    </select>
+</mapper>
