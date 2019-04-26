@@ -2,6 +2,8 @@ package top.luoren.basis.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import top.luoren.basis.entity.User;
 import top.luoren.basis.mapper.UserMapper;
@@ -22,5 +24,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<User> listUser(Map<String, String> params) {
         Page<User> page = new Query<User>(params).getPage();
         return baseMapper.listUser(page, params);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
     }
 }
