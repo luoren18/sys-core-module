@@ -3,3 +3,9 @@ server:
 spring:
   profiles:
     active: dev
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  # 开启驼峰命名法
+  configuration:
+    map-underscore-to-camel-case: true

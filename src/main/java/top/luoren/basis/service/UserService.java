@@ -18,4 +18,12 @@ public interface UserService extends IService<User>, UserDetailsService {
      * @return
      */
     List<User> listUser(Map<String, String> params);
+
+    /**
+     * 用户注册，必须字段
+     * @param username
+     * @param password
+     * @return
+     */
+    int userReg(String username,String password);
 }

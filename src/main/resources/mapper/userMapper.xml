@@ -5,8 +5,35 @@
     <resultMap id="userVO" type="top.luoren.basis.entity.vo.UserVO">
         <result property="age" column="age" javaType="java.lang.Integer"/>
         <result property="name" column="name" javaType="java.lang.String"/>
+        <result property="username" column="username" javaType="java.lang.String"/>
         <result property="email" column="email" javaType="java.lang.String"/>
     </resultMap>
+
+    <resultMap id="BaseResultMap" type="top.luoren.basis.entity.User">
+        <id column="id" property="id"/>
+        <result column="age" property="age"/>
+        <result column="email" property="email"/>
+        <result column="name" property="name"/>
+        <result column="enabled" property="enabled"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+    </resultMap>
+
+    <!--  懒加载  -->
+    <resultMap id="lazyLoadRoles" type="top.luoren.basis.entity.User" extends="BaseResultMap">
+        <collection property="roles" ofType="top.luoren.basis.entity.Role" select="getRolesByUserId" column="id"/>
+    </resultMap>
+    <!--  直接加载  -->
+    <resultMap id="eagerLoadRoles" type="top.luoren.basis.entity.User" extends="BaseResultMap">
+        <collection property="roles" ofType="top.luoren.basis.entity.Role">
+            <id property="id" column="rid"/>
+            <result property="name" column="name"/>
+            <result property="cname" column="cname"/>
+        </collection>
+    </resultMap>
+    <insert id="userReg">
+        insert into user set username=#{username} ,password=#{password}
+    </insert>
 
     <select id="listUser" resultType="top.luoren.basis.entity.User">
         select * from user u
@@ -15,6 +42,13 @@
                 u.name like concat('%',#{params.key},'%') or u.email like concat('%',#{params.key},'%')
             </if>
         </where>
+    </select>
 
+    <select id="loadUserByUsername" resultMap="lazyLoadRoles">
+        select * from user WHERE username=#{username};
+    </select>
+
+    <select id="getRolesByUserId" resultType="top.luoren.basis.entity.Role">
+         SELECT r.* FROM user_role ur,role r where ur.rid=r.id AND ur.uid=#{id}
     </select>
 </mapper>

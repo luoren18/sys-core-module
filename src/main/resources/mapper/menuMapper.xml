@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.luoren.basis.mapper.MenuMapper">
+
+
+    <resultMap id="BaseResultMap" type="top.luoren.basis.entity.Menu">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="icon_cls" property="iconCls" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+        <result column="enabled" property="enabled" javaType="java.lang.Boolean"/>
+        <collection property="roles" ofType="top.luoren.basis.entity.Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+            <result column="rcname" property="cname"/>
+        </collection>
+    </resultMap>
+    <select id="getAllMenu" resultMap="BaseResultMap">
+        select m.* , r.id as rid ,r.name as rname ,r.cname as rcname
+        from menu m
+        left join menu_role mr on m.id=menu.mid
+        left join role r on mr.rid=r.id
+        where m.enabled=true order by length(m.url) desc
+    </select>
+</mapper>

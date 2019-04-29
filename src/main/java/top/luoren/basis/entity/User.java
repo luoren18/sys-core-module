@@ -2,9 +2,12 @@ package top.luoren.basis.entity;
 
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author luoren
@@ -14,14 +17,23 @@ import java.util.Collection;
 public class User implements UserDetails {
     private int id;
     private String name;
+    private String username;
     private String password;
     private int age;
     private String email;
     private boolean enabled;
+    private Set<Role> roles;
+
+
+    public User(){}
+    public User(String username,String password){
+        this.username=username;
+        this.password=password;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
     }
 
     @Override
@@ -29,16 +41,28 @@ public class User implements UserDetails {
         return name;
     }
 
+    /**
+     * 账户是否过期
+     * @return
+     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    /**
+     * 账户是否被锁定
+     * @return
+     */
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    /**
+     * 用户凭证是否过期
+     * @return
+     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
@@ -46,6 +70,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return enabled;
     }
 }

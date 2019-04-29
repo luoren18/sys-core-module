@@ -12,5 +12,3 @@ logging:
   level:
     top.luoren.basis: debug
 
-mybatis-plus:
-  mapper-locations: classpath:/mapper/*Mapper.xml
