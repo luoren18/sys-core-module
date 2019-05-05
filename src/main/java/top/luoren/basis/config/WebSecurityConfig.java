@@ -1,18 +1,17 @@
 package top.luoren.basis.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import top.luoren.basis.service.UserService;
+import top.luoren.basis.util.RespBody;
+
+import java.io.PrintWriter;
 
 /**
  * @author luoren
@@ -25,36 +24,35 @@ import top.luoren.basis.service.UserService;
  */
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
+@Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    UserService userService;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    LoginSuccessHandler loginSuccessHandler;
-    @Autowired
-    LoginFailureHandler loginFailureHandler;
-    @Autowired
-    AuthenticationProvider authenticationProvider;
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) {
-        //自定义用户校验规则
-        auth.authenticationProvider(authenticationProvider);
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/reg", "/login_page");
-    }
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.formLogin()
-                .loginPage("/login_page").loginProcessingUrl("/login")
-                .successHandler(loginSuccessHandler)
-                .failureHandler(loginFailureHandler)
+        http.formLogin()//表单登录
+                .loginPage("/login_page")
+                .loginProcessingUrl("/login")
+                .successHandler((request, response, authentication) -> {
+                    response.setContentType("application/json;charset=utf-8");
+                    PrintWriter out = response.getWriter();
+                    RespBody respBody = RespBody.ok("登录成功");
+                    out.print(respBody);
+                    out.flush();
+                    out.close();
+                })
+                .failureHandler((request, response, exception) -> {
+                    response.setContentType("application/json;charset=utf-8");
+                    PrintWriter out = response.getWriter();
+                    RespBody respBody = RespBody.error("非法访问，请确认账号密码后重试！");
+                    out.print(respBody);
+                    out.flush();
+                    out.close();
+                })
+                .and()
+                .authorizeRequests()//权限配置
+                .antMatchers("/reg","/login_page","/code/image", "/login.html").permitAll()
+                .anyRequest()//所有请求
+                .authenticated()//都需要认证
                 .and().csrf().disable();
     }
 
