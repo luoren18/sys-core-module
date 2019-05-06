@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+
     @Autowired
     VaptchaFilter vaptchaFilter;
 
