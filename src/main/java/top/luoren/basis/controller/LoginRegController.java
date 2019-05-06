@@ -5,10 +5,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import top.luoren.basis.annotation.Log;
+import top.luoren.basis.entity.ImageCode;
+import top.luoren.basis.service.ImageCodeService;
 import top.luoren.basis.service.UserService;
+import top.luoren.basis.util.ImageCodeUtil;
 import top.luoren.basis.util.RespBody;
 
-import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author luoren
@@ -19,6 +24,8 @@ public class LoginRegController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    ImageCodeService imageCodeService;
 
     @Log("注册接口")
     @RequestMapping("/reg")
@@ -45,9 +52,25 @@ public class LoginRegController {
         return RespBody.ok();
     }
 
-
+    /**
+     * 获取验证码
+     *
+     * @param uuid
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping("/captcha")
-    public BufferedImage captcha(String uuid) {
-        return null;
+    public void captcha(String uuid, HttpServletResponse response) throws IOException {
+        // 设置响应的类型格式为图片格式
+        response.setContentType("image/jpeg");
+        // 禁止图像缓存。
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+        ImageCode imageCode = ImageCodeUtil.creatImage(150,40,5);
+        imageCode.setId(uuid);
+        imageCodeService.saveOrUpdate(imageCode);
+        ImageIO.write(imageCode.getImage(), "jpeg", response.getOutputStream());
     }
+
 }

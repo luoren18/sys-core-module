@@ -22,5 +22,7 @@ public class SysLog {
     private String method;
     private String params;
     private String ip;
+    private String code;
+    private String message;
     private LocalDateTime createTime;
 }

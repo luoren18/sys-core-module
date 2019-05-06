@@ -1,6 +1,6 @@
 package top.luoren.basis.config;
 
-import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import top.luoren.basis.filter.VaptchaFilter;
 import top.luoren.basis.util.RespBody;
 
 import java.io.PrintWriter;
@@ -27,8 +29,12 @@ import java.io.PrintWriter;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    VaptchaFilter vaptchaFilter;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+//        http.addFilterBefore(vaptchaFilter, UsernamePasswordAuthenticationFilter.class);
         http.formLogin()//表单登录
                 .loginPage("/login_page")
                 .loginProcessingUrl("/login")
@@ -43,14 +49,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureHandler((request, response, exception) -> {
                     response.setContentType("application/json;charset=utf-8");
                     PrintWriter out = response.getWriter();
-                    RespBody respBody = RespBody.error("非法访问，请确认账号密码后重试！");
+                    RespBody respBody = RespBody.error(exception.getMessage());
                     out.print(respBody);
                     out.flush();
                     out.close();
                 })
                 .and()
                 .authorizeRequests()//权限配置
-                .antMatchers("/reg","/login_page","/code/image", "/login.html").permitAll()
+                .antMatchers("/captcha", "/reg", "/login_page", "/code/image", "/login.html").permitAll()
                 .anyRequest()//所有请求
                 .authenticated()//都需要认证
                 .and().csrf().disable();

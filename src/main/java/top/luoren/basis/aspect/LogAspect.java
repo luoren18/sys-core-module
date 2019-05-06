@@ -8,11 +8,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import top.luoren.basis.annotation.Log;
 import top.luoren.basis.entity.SysLog;
 import top.luoren.basis.mapper.SysLogMapper;
 import top.luoren.basis.util.HttpContextUtil;
 import top.luoren.basis.util.JwtTokenUtil;
+import top.luoren.basis.util.RespBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -36,19 +38,25 @@ public class LogAspect {
     }
 
     @Around("pointcut()")
-    public void around(ProceedingJoinPoint point) {
+    public RespBody around(ProceedingJoinPoint point) {
         long beninTime = System.currentTimeMillis();
+        RespBody respBody = RespBody.ok();
         try {
-            Object object=point.proceed();
+            Object obj = point.proceed();
+            if (!ObjectUtils.isEmpty(obj)) {
+                respBody = (RespBody) obj;
+            }
+
         } catch (Throwable e) {
             e.printStackTrace();
         }
         long time = System.currentTimeMillis() - beninTime;
-        saveLog(point,time);
+
+        saveLog(point, respBody, time);
+        return respBody;
     }
 
-
-    private void saveLog(ProceedingJoinPoint joinPoint, long time) {
+    private void saveLog(ProceedingJoinPoint joinPoint, RespBody respBody, long time) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         SysLog sysLog = new SysLog();
@@ -81,6 +89,8 @@ public class LogAspect {
 //        String token=request.getHeader("token");
 //        String username=tokenUtil.getUsernameFromToken(token);
 //        sysLog.setUsername(username);
+        sysLog.setMessage((String) respBody.get("msg"));
+        sysLog.setCode((String) respBody.get("code"));
         sysLog.setTime((int) time);
         sysLog.setCreateTime(LocalDateTime.now());
         sysLogMapper.insert(sysLog);
