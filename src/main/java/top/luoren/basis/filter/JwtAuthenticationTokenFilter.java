@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.NonceExpiredException;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import top.luoren.basis.service.UserService;
@@ -25,18 +26,17 @@ import java.io.IOException;
  * @date 2019-05-08 15:33
  */
 @Slf4j
+@Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Value("${jwt.header}")
     private String token_header;
-    @Value("${jwt.token-head}")
-    String tokenStart;
     @Autowired
     JwtTokenUtil tokenUtil;
     @Autowired
     UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = httpServletRequest.getHeader(token_header);
         if (!StringUtils.isEmpty(token)) {
             String username = tokenUtil.getUsernameFromToken(token);
@@ -46,13 +46,15 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             if (tokenUtil.isTokenExpired(token)) {
                 throw new NonceExpiredException("token已过期");
             }
-            if (SecurityContextHolder.getContext().getAuthentication() == null){
-                UserDetails userDetails=userService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken();
-                UsernamePasswordAuthenticationFilter
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userService.loadUserByUsername(username);
+                if (tokenUtil.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
         }
-
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
 
     }
 }

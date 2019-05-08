@@ -26,4 +26,12 @@ public interface UserService extends IService<User>, UserDetailsService {
      * @return
      */
     int userReg(String username,String password);
+
+    /**
+     * 用户登录
+     * @param username
+     * @param password
+     * @return
+     */
+    String userLogin(String username,String password);
 }

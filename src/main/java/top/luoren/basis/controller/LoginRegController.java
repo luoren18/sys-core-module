@@ -2,10 +2,12 @@ package top.luoren.basis.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import top.luoren.basis.annotation.Log;
 import top.luoren.basis.entity.ImageCode;
+import top.luoren.basis.entity.User;
 import top.luoren.basis.service.ImageCodeService;
 import top.luoren.basis.service.UserService;
 import top.luoren.basis.util.ImageCodeUtil;
@@ -30,11 +32,14 @@ public class LoginRegController {
     @Log("注册接口")
     @RequestMapping("/reg")
     @ResponseBody
-    public RespBody userReg(String username, String password) {
-        int code = userService.userReg(username, password);
+    public RespBody userReg(@RequestBody User user) {
+
+        int code = userService.userReg(user.getUsername(), user.getPassword());
         if (code == -1) {
             return RespBody.error("用户名已存在,注册失败");
         } else if (code == 1) {
+//            RespBody respBody=RespBody.ok("注册成功");
+//            respBody.put()
             return RespBody.ok("注册成功");
         }
         return RespBody.error("注册失败");
@@ -48,8 +53,11 @@ public class LoginRegController {
 
     @RequestMapping("/login")
     @ResponseBody
-    public RespBody login() {
-        return RespBody.ok();
+    public RespBody login(@RequestBody User user) {
+        String token =userService.userLogin(user.getUsername(), user.getPassword());
+        RespBody respBody=RespBody.ok();
+        respBody.put("token",token);
+        return respBody;
     }
 
     /**
@@ -67,7 +75,7 @@ public class LoginRegController {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
-        ImageCode imageCode = ImageCodeUtil.creatImage(150,40,5);
+        ImageCode imageCode = ImageCodeUtil.creatImage(150, 40, 5);
         imageCode.setId(uuid);
         imageCodeService.saveOrUpdate(imageCode);
         ImageIO.write(imageCode.getImage(), "jpeg", response.getOutputStream());

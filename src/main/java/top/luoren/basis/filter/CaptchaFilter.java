@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author luoren
  * @date 2019-05-06 15:06
  */
-@Component
+//@Component
 public class CaptchaFilter extends OncePerRequestFilter {
     private static final String LOGIN_URI = "/login";
     private static final String METHOD_POST = "post";

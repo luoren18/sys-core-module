@@ -4,14 +4,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import top.luoren.basis.entity.User;
+import top.luoren.basis.exception.CustomException;
 import top.luoren.basis.mapper.UserMapper;
 import top.luoren.basis.service.UserService;
+import top.luoren.basis.util.JwtTokenUtil;
 import top.luoren.basis.util.Query;
 
 import java.util.List;
@@ -27,6 +32,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     PasswordEncoder encoder;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    JwtTokenUtil tokenUtil;
 
     @Override
     public List<User> listUser(Map<String, String> params) {
@@ -44,12 +53,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public String userLogin(String username, String password) {
+        final Authentication authentication =authentication(username,password);
+        final String token=tokenUtil.generateToken((UserDetails) authentication.getPrincipal());
+        return token;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = baseMapper.loadUserByUsername(username);
         if (ObjectUtils.isEmpty(user)) {
-            log.info("登录用户：" + username + " 不存在.");
+            log.info("用户：" + username + " 不存在.");
             throw new UsernameNotFoundException("用户不存在");
         }
         return user;
+    }
+
+
+    public Authentication authentication(String username, String password) {
+        try {
+            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage());
+        }
     }
 }

@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sys-basis-mybatis?userUnicode=true&characterEncoding=utf-8
     username: root
-    password: luoren
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
     schema: classpath:db/schema-mysql.sql
     data: classpath:db/data-mysql.sql
@@ -18,5 +18,4 @@ jwt:
   secret: mySecret
   #token有效期一天
   expiration: 86400
-  token-head: "Bearer "
 

@@ -24,6 +24,14 @@ public class User implements UserDetails {
     private boolean enabled;
     private Set<Role> roles;
 
+    public User() {
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -32,11 +40,12 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return name;
+        return username;
     }
 
     /**
      * 账户是否过期
+     *
      * @return
      */
     @Override
@@ -46,6 +55,7 @@ public class User implements UserDetails {
 
     /**
      * 账户是否被锁定
+     *
      * @return
      */
     @Override
@@ -55,6 +65,7 @@ public class User implements UserDetails {
 
     /**
      * 用户凭证是否过期
+     *
      * @return
      */
     @Override

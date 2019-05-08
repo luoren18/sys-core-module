@@ -1,3 +1,4 @@
+use `sys-basis-mybatis`;
 drop table if exists user;
 create table user(
     id int (11) not null AUTO_INCREMENT COMMENT '主键ID',
