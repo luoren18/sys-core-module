@@ -11,7 +11,7 @@ import top.luoren.basis.util.RespBody;
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
+    @ExceptionHandler({CustomException.class, ImageCodeException.class})
     public RespBody handler(CustomException e) {
         return RespBody.error(e.getCode(), e.getMessage());
     }

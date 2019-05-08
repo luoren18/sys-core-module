@@ -1,7 +1,7 @@
 package top.luoren.basis.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -23,7 +23,7 @@ import java.io.IOException;
  * @date 2019-05-06 15:06
  */
 @Component
-public class VaptchaFilter extends OncePerRequestFilter {
+public class CaptchaFilter extends OncePerRequestFilter {
     private static final String LOGIN_URI = "/login";
     private static final String METHOD_POST = "post";
     @Autowired
@@ -44,7 +44,7 @@ public class VaptchaFilter extends OncePerRequestFilter {
     }
 
 
-    private void validateImageCode(String code, String codeID) throws AuthenticationException {
+    private void validateImageCode(String code, String codeID) {
         if (StringUtils.isEmpty(code)) {
             throw new ImageCodeException("验证码不能为空");
         }

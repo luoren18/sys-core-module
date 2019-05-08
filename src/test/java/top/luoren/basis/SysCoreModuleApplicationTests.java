@@ -1,6 +1,9 @@
 package top.luoren.basis;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +28,8 @@ public class SysCoreModuleApplicationTests {
     private UserService userService;
     @Autowired
     ImageCodeService imageCodeService;
-
+    @Autowired
+    Gson gson;
     @Test
     public void contextLoads() {
     }
@@ -67,6 +71,18 @@ public class SysCoreModuleApplicationTests {
     public void test3() {
         ImageCode imageCode = imageCodeService.getById("392ce391-e074-4850-a396-21bd4b22fc87");
         System.out.println(imageCode);
+    }
+
+    /**
+     * 测试gson
+     */
+    @Test
+    public void test4() {
+        String json = "{\"a\":\"A\",\"b\":\"B\",\"c\":\"C\",\"d\":\"D\",\"e\":\"E\"}";
+//        JsonObject object=new JsonParser().parse(json).getAsJsonObject();
+        JsonObject object=gson.fromJson(json,JsonObject.class);
+        String a=object.get("a").getAsString();
+        System.out.println(a);
     }
 
 }

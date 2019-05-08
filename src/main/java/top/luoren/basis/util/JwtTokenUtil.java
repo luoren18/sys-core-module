@@ -28,8 +28,6 @@ public class JwtTokenUtil {
      */
     private Long expiration;
 
-    private String header;
-
     /**
      * 从数据声明生成令牌
      *
@@ -131,6 +129,15 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        JwtTokenUtil tokenUtil=new JwtTokenUtil();
+        String token=tokenUtil.generateToken(new User("luoren","123456"));
+        System.out.println(token);
+        Thread.sleep(3000);
+        boolean isExpired=tokenUtil.isTokenExpired(token);
+        System.out.println(isExpired);
     }
 }
 

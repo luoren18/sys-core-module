@@ -1,19 +1,19 @@
 package top.luoren.basis.config;
 
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import top.luoren.basis.filter.VaptchaFilter;
-import top.luoren.basis.util.RespBody;
-
-import java.io.PrintWriter;
+import top.luoren.basis.filter.CaptchaFilter;
+import top.luoren.basis.service.UserService;
 
 /**
  * @author luoren
@@ -29,39 +29,32 @@ import java.io.PrintWriter;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-
     @Autowired
-    VaptchaFilter vaptchaFilter;
+    UserService userService;
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.addFilterBefore(vaptchaFilter, UsernamePasswordAuthenticationFilter.class);
-        http.formLogin()//表单登录
-                .loginPage("/login_page")
-                .loginProcessingUrl("/login")
-                .successHandler((request, response, authentication) -> {
-                    response.setContentType("application/json;charset=utf-8");
-                    PrintWriter out = response.getWriter();
-                    RespBody respBody = RespBody.ok("登录成功");
-                    out.print(respBody);
-                    out.flush();
-                    out.close();
-                })
-                .failureHandler((request, response, exception) -> {
-                    response.setContentType("application/json;charset=utf-8");
-                    PrintWriter out = response.getWriter();
-                    RespBody respBody = RespBody.error(exception.getMessage());
-                    out.print(respBody);
-                    out.flush();
-                    out.close();
-                })
+        //异常处理
+        http.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler)
+                .and().csrf().disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(unauthorizedHandler)
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()//权限配置
-                .antMatchers("/captcha", "/reg", "/login_page", "/code/image", "/login.html").permitAll()
+                .antMatchers("/login", "/captcha", "/reg", "/login_page", "/code/image", "/login.html").permitAll()
                 .anyRequest()//所有请求
                 .authenticated()//都需要认证
-                .and().csrf().disable();
+                .and().headers().cacheControl();// 禁用缓存
+//        http.addFilterBefore()
     }
+
 
     /**
      * 使用BCrypt的强散列哈希加密实现，并可以由客户端指定加密的强度strength，强度越高安全性自然就越高，默认为10.
