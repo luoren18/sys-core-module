@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,7 +55,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String userLogin(String username, String password) {
         final Authentication authentication =authentication(username,password);
-        final String token=tokenUtil.generateToken((UserDetails) authentication.getPrincipal());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        final String token = tokenUtil.generateToken(userDetails);
+        System.out.println(SecurityContextHolder.getContext().getAuthentication());
         return token;
     }
 
@@ -73,8 +76,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Authentication authentication(String username, String password) {
         try {
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (Exception e) {
-            throw new CustomException(e.getMessage());
+        } catch (DisabledException e) {
+            throw new CustomException("账户未激活");
+        } catch (BadCredentialsException e) {
+            throw new CustomException("用户名或密码错误");
+        } catch (LockedException e) {
+            throw new CustomException("账户被锁定");
         }
     }
 }

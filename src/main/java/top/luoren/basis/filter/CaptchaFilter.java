@@ -29,6 +29,9 @@ public class CaptchaFilter extends OncePerRequestFilter {
     @Autowired
     ImageCodeService imageCodeService;
 
+
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         if (LOGIN_URI.equalsIgnoreCase(request.getRequestURI()) && METHOD_POST.equalsIgnoreCase(request.getMethod())) {
