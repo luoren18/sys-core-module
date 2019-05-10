@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import top.luoren.basis.annotation.Log;
 import top.luoren.basis.entity.ImageCode;
 import top.luoren.basis.entity.User;
@@ -21,7 +22,8 @@ import java.io.IOException;
  * @author luoren
  * @date 2019-04-29 10:24
  */
-@Controller
+@RestController
+@RequestMapping("/authentication")
 public class LoginRegController {
 
     @Autowired
@@ -31,7 +33,6 @@ public class LoginRegController {
 
     @Log("注册接口")
     @RequestMapping("/reg")
-    @ResponseBody
     public RespBody userReg(@RequestBody User user) {
 
         int code = userService.userReg(user.getUsername(), user.getPassword());
@@ -45,14 +46,8 @@ public class LoginRegController {
         return RespBody.error("注册失败");
     }
 
-    @RequestMapping("/login_page")
-    public String loginPage() {
-        return "login";
-    }
-
 
     @RequestMapping("/login")
-    @ResponseBody
     public RespBody login(@RequestBody User user) {
         String token =userService.userLogin(user.getUsername(), user.getPassword());
         RespBody respBody=RespBody.ok();

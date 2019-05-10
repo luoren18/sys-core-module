@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import top.luoren.basis.entity.User;
+import top.luoren.basis.entity.constant.JwtConst;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,12 +22,7 @@ import java.util.Map;
 @Component
 @ConfigurationProperties(prefix = "jwt")
 public class JwtTokenUtil {
-    private String secret;
 
-    /**
-     * 过期时间（ms 毫秒）
-     */
-    private Long expiration;
 
     /**
      * 从数据声明生成令牌
@@ -35,8 +31,8 @@ public class JwtTokenUtil {
      * @return 令牌
      */
     private String generateToken(Map<String, Object> claims) {
-        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
-        return Jwts.builder().setClaims(claims).setExpiration(expirationDate).signWith(SignatureAlgorithm.HS512, secret).compact();
+        Date expirationDate = new Date(System.currentTimeMillis() + JwtConst.EXPIRATION_TIME);
+        return Jwts.builder().setClaims(claims).setExpiration(expirationDate).signWith(SignatureAlgorithm.HS512, JwtConst.SECRET).compact();
     }
 
     /**
@@ -48,7 +44,7 @@ public class JwtTokenUtil {
     private Claims getClaimsFromToken(String token) {
         Claims claims;
         try {
-            claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            claims = Jwts.parser().setSigningKey(JwtConst.SECRET).parseClaimsJws(token).getBody();
         } catch (Exception e) {
             claims = null;
         }

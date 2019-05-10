@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()//权限配置
-                .antMatchers("/login", "/captcha", "/reg", "/login_page", "/code/image", "/login.html").permitAll()
+                .antMatchers("/authentication/**").permitAll()
                 .anyRequest()//所有请求
                 .authenticated()//都需要认证
                 .and().headers().cacheControl();// 禁用缓存
