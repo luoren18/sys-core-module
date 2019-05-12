@@ -1,5 +1,6 @@
 package top.luoren.basis.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +15,13 @@ import top.luoren.basis.util.RespBody;
 public class UserController {
 
     @PostMapping("hello")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RespBody sayHello() {
         return RespBody.ok();
     }
 
+    @PostMapping("/hello2")
+    public RespBody hello2(){
+        return RespBody.error();
+    }
 }

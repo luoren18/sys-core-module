@@ -3,6 +3,7 @@ package top.luoren.basis.config;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -36,9 +37,11 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("权限不足：" + accessDeniedException.getMessage());
+        response.setStatus(HttpStatus.OK.value());
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter out = response.getWriter();
-        RespBody respBody = RespBody.error(accessDeniedException.getMessage());
+        RespBody respBody = RespBody.error("权限不足，" + accessDeniedException.getMessage());
         out.print(gson.toJson(respBody));
         out.flush();
         out.close();

@@ -21,7 +21,7 @@
     <select id="getAllMenu" resultMap="BaseResultMap">
         select m.* , r.id as rid ,r.name as rname ,r.cname as rcname
         from menu m
-        left join menu_role mr on m.id=menu.mid
+        left join menu_role mr on m.id=mr.mid
         left join role r on mr.rid=r.id
         where m.enabled=true order by length(m.url) desc
     </select>

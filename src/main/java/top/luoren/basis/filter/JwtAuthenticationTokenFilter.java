@@ -2,6 +2,7 @@ package top.luoren.basis.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,7 +37,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String token = httpServletRequest.getHeader(JwtConst.HEADER_STRING);
         if (!StringUtils.isEmpty(token)) {
             String username = tokenUtil.getUsernameFromToken(token);
-
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userService.loadUserByUsername(username);
                 if (tokenUtil.validateToken(token, userDetails)) {
