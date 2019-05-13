@@ -31,6 +31,7 @@ public class CustomAccessDecisionManager implements AccessDecisionManager {
                 return;
             }
         }
+        throw new AccessDeniedException("不允许访问");
 
     }
 

@@ -4,6 +4,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import top.luoren.basis.annotation.Log;
 import top.luoren.basis.util.RespBody;
 
 /**
@@ -14,6 +15,7 @@ import top.luoren.basis.util.RespBody;
 @RequestMapping("/user")
 public class UserController {
 
+    @Log("用户测试接口")
     @PostMapping("hello")
     @PreAuthorize("hasRole('ROLE_admin')")
     public RespBody sayHello() {

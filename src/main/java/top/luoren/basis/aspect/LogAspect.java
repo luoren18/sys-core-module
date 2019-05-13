@@ -86,9 +86,9 @@ public class LogAspect {
         HttpServletRequest request= HttpContextUtil.getHttpServletRequest();
         sysLog.setIp(HttpContextUtil.getIpAddr(request));
         //获取用户名
-//        String token=request.getHeader("token");
-//        String username=tokenUtil.getUsernameFromToken(token);
-//        sysLog.setUsername(username);
+        String token=request.getHeader("token");
+        String username=tokenUtil.getUsernameFromToken(token);
+        sysLog.setUsername(username);
         sysLog.setMessage((String) respBody.get("msg"));
         sysLog.setCode((String) respBody.get("code"));
         sysLog.setTime((int) time);
