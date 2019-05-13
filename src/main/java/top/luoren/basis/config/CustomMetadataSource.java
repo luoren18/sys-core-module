@@ -7,18 +7,15 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.CollectionUtils;
 import top.luoren.basis.entity.Menu;
 import top.luoren.basis.entity.Role;
 import top.luoren.basis.mapper.MenuMapper;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
- * 获取请求所需要的权限
+ * 返回可以访问该接口的角色
  *
  * @author luoren
  * @date 2019-05-09 14:48

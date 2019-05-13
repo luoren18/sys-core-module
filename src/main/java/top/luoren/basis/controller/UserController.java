@@ -22,6 +22,6 @@ public class UserController {
 
     @PostMapping("/hello2")
     public RespBody hello2(){
-        return RespBody.error();
+        return RespBody.error("其实已经访问成功！");
     }
 }
