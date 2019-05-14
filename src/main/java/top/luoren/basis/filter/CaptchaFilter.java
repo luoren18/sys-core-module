@@ -1,13 +1,15 @@
 package top.luoren.basis.filter;
 
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import top.luoren.basis.config.CustomAuthenticationEntryPoint;
 import top.luoren.basis.entity.ImageCode;
-import top.luoren.basis.exception.ImageCodeException;
+import top.luoren.basis.exception.IdentityAuthException;
 import top.luoren.basis.service.ImageCodeService;
 
 import javax.servlet.FilterChain;
@@ -22,15 +24,17 @@ import java.io.IOException;
  * @author luoren
  * @date 2019-05-06 15:06
  */
-//@Component
+@Component
+@Slf4j
 public class CaptchaFilter extends OncePerRequestFilter {
-    private static final String LOGIN_URI = "/login";
+    private static final String LOGIN_URI = "/authentication/login";
     private static final String METHOD_POST = "post";
     @Autowired
+    CustomAuthenticationEntryPoint authenticationEntryPoint;
+    @Autowired
     ImageCodeService imageCodeService;
-
-
-
+    @Autowired
+    Gson gson;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
@@ -39,32 +43,33 @@ public class CaptchaFilter extends OncePerRequestFilter {
             String codeId = request.getParameter("CODE_ID");
             try {
                 validateImageCode(imageCode, codeId);
-            } catch (ImageCodeException e) {
-                e.printStackTrace();
+            } catch (IdentityAuthException e) {
+                authenticationEntryPoint.commence(request, response, e);
+                return;
             }
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
     }
 
 
     private void validateImageCode(String code, String codeID) {
         if (StringUtils.isEmpty(code)) {
-            throw new ImageCodeException("验证码不能为空");
+            throw new IdentityAuthException("验证码不能为空");
         }
         if (StringUtils.isEmpty(codeID)) {
-            throw new ImageCodeException("无效的验证码,不存在 CODE_ID");
+            throw new IdentityAuthException("无效的验证码,不存在 CODE_ID");
         }
         ImageCode imageCode = imageCodeService.getById(codeID);
         if (ObjectUtils.isEmpty(imageCode)) {
-            throw new ImageCodeException("无效的验证码");
+            throw new IdentityAuthException("无效的验证码");
         }
         if (imageCode.isExpire()) {
             //删除过期的验证码
             imageCodeService.removeById(codeID);
-            throw new ImageCodeException("验证码已过期");
+            throw new IdentityAuthException("验证码已过期");
         }
         if (!imageCode.getCode().equalsIgnoreCase(code)) {
-            throw new ImageCodeException("错误的验证码");
+            throw new IdentityAuthException("错误的验证码");
         }
     }
 

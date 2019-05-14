@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import top.luoren.basis.entity.User;
+import top.luoren.basis.filter.CaptchaFilter;
 import top.luoren.basis.filter.JwtAuthenticationTokenFilter;
 import top.luoren.basis.service.UserService;
 
@@ -39,6 +41,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     CustomAuthenticationEntryPoint unauthorizedHandler;
     @Autowired
+    CaptchaFilter captchaFilter;
+    @Autowired
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
     @Autowired
     CustomMetadataSource metadataSource;
@@ -54,6 +58,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests().withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+            /**
+             * 自定义用户权限处理
+             * @param object
+             * @param <O>
+             * @return
+             */
             @Override
             public <O extends FilterSecurityInterceptor> O postProcess(O object) {
                 object.setSecurityMetadataSource(metadataSource);
@@ -61,12 +71,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 return object;
             }
         });
-        //异常处理
-        http.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler)
-                .and().csrf().disable()
-                .exceptionHandling()
+        //
+        http.exceptionHandling()
+                //认证授权异常处理
+                .accessDeniedHandler(customAccessDeniedHandler)
                 .authenticationEntryPoint(unauthorizedHandler)
-                .and()
+                .and().csrf().disable()//关闭csrf
+                //前后端分离，JWT 认证，关闭session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()//权限配置
@@ -74,7 +85,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()//所有请求
                 .authenticated()//都需要认证
                 .and().headers().cacheControl();// 禁用缓存
-        //添加JWT 过滤器
+        //添加验证码过滤器，JWT 过滤器
+        http.addFilterBefore(captchaFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 

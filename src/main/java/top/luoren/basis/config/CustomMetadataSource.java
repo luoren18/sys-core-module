@@ -48,8 +48,4 @@ public class CustomMetadataSource implements FilterInvocationSecurityMetadataSou
         return FilterInvocation.class.isAssignableFrom(clazz);
     }
 
-
-    public static void main(String[] args) {
-        System.out.println(new CustomMetadataSource().antPathMatcher.match("/request/a","/request/a/"));
-    }
 }

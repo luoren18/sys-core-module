@@ -9,7 +9,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import top.luoren.basis.config.CustomAuthenticationEntryPoint;
 import top.luoren.basis.entity.constant.JwtConst;
+import top.luoren.basis.exception.IdentityAuthException;
 import top.luoren.basis.service.UserService;
 import top.luoren.basis.util.JwtTokenUtil;
 
@@ -30,23 +32,42 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     JwtTokenUtil tokenUtil;
     @Autowired
     UserService userService;
+    @Autowired
+    CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = httpServletRequest.getHeader(JwtConst.HEADER_STRING);
-        if (!StringUtils.isEmpty(token)) {
+        try {
+            validateToken(token);
+        } catch (IdentityAuthException e) {
+            authenticationEntryPoint.commence(httpServletRequest, httpServletResponse, e);
+            return;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String username = tokenUtil.getUsernameFromToken(token);
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userService.loadUserByUsername(username);
-                if (tokenUtil.validateToken(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(
-                            httpServletRequest));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+            UserDetails userDetails = userService.loadUserByUsername(username);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(
+                    httpServletRequest));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            httpServletRequest.setAttribute("username", username);
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+
+    private void validateToken(String token) {
+        if (StringUtils.isEmpty(token)) {
+            throw new IdentityAuthException("token 不存在");
+        }
+        if (tokenUtil.getUsernameFromToken(token) == null) {
+            throw new IdentityAuthException("无效的token");
+        }
+        if (tokenUtil.isTokenExpired(token)) {
+            throw new IdentityAuthException("过期的token");
+        }
     }
 }

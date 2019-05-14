@@ -2,6 +2,7 @@ package top.luoren.basis.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.luoren.basis.annotation.Log;
@@ -23,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping("/hello2")
-    public RespBody hello2(){
-        return RespBody.error("其实已经访问成功！");
+    public RespBody hello2(@RequestAttribute String username) {
+        return RespBody.ok(username + "已经访问成功！");
     }
 }
