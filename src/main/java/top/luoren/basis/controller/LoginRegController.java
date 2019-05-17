@@ -15,6 +15,7 @@ import top.luoren.basis.util.RespBody;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.IOException;
 
 /**
@@ -29,6 +30,8 @@ public class LoginRegController {
     UserService userService;
     @Autowired
     ImageCodeService imageCodeService;
+    @Autowired
+    DataSource dataSource;
 
     @Log("注册接口")
     @RequestMapping("/reg")

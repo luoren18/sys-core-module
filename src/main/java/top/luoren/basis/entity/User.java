@@ -1,5 +1,6 @@
 package top.luoren.basis.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,21 +34,17 @@ public class User implements UserDetails {
     }
 
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
     }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
     /**
      * 账户是否过期
      *
      * @return
      */
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -58,6 +55,7 @@ public class User implements UserDetails {
      *
      * @return
      */
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
@@ -68,6 +66,7 @@ public class User implements UserDetails {
      *
      * @return
      */
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;

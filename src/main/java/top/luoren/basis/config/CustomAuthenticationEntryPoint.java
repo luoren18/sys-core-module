@@ -41,7 +41,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
         PrintWriter out = response.getWriter();
-        RespBody respBody = RespBody.error("认证失败，访问此资源需要完全身份验证");
+        RespBody respBody = RespBody.error("认证失败,"+authException.getMessage());
         out.print(gson.toJson(respBody));
         out.flush();
         out.close();

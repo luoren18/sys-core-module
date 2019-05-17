@@ -7,10 +7,14 @@ spring:
     schema: classpath:db/schema-mysql.sql
     data: classpath:db/data-mysql.sql
     initialization-mode: never
+
+  redis:
+    password: luoren
 # Logger Config
 logging:
   level:
     top.luoren.basis: debug
+
 
 # JWT
 jwt:

@@ -12,9 +12,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import top.luoren.basis.entity.User;
 import top.luoren.basis.exception.CustomException;
 import top.luoren.basis.mapper.UserMapper;
+import top.luoren.basis.service.RedisService;
 import top.luoren.basis.service.UserService;
 import top.luoren.basis.util.JwtTokenUtil;
 import top.luoren.basis.util.Query;
@@ -29,6 +31,10 @@ import java.util.Map;
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    //设置用户数据在Redis中的key的前缀
+    private static final String REDIS_KEY_PREFIX = "USER:USERNAME:";
+    //设置Redis中用户数据的有效时间
+    private static final long USER_EXPIRE_TIME = 7200L;
 
     @Autowired
     PasswordEncoder encoder;
@@ -36,6 +42,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     AuthenticationManager authenticationManager;
     @Autowired
     JwtTokenUtil tokenUtil;
+    @Autowired
+    RedisService<String, User> userRedisService;
 
     @Override
     public List<User> listUser(Map<String, String> params) {
@@ -64,10 +72,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = baseMapper.loadUserByUsername(username);
+        User user = null;
+        boolean isExistInRedis = true;
+        if (!StringUtils.isEmpty(username)) {
+            user = userRedisService.get(REDIS_KEY_PREFIX + username);
+            if (ObjectUtils.isEmpty(user)) {
+                isExistInRedis = false;
+                user = baseMapper.loadUserByUsername(username);
+            }
+        }
         if (ObjectUtils.isEmpty(user)) {
             log.info("用户：" + username + " 不存在.");
             throw new UsernameNotFoundException("用户不存在");
+        }
+        if (!isExistInRedis) {
+            userRedisService.set(REDIS_KEY_PREFIX + username, user, USER_EXPIRE_TIME);
         }
         return user;
     }
