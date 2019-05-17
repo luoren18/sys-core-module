@@ -1,6 +1,7 @@
 package top.luoren.basis.filter;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,10 +40,13 @@ public class CaptchaFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         if (LOGIN_URI.equalsIgnoreCase(request.getRequestURI()) && METHOD_POST.equalsIgnoreCase(request.getMethod())) {
-            String imageCode = request.getParameter("imageCode");
-            String codeId = request.getParameter("CODE_ID");
+            JsonObject requestBody = gson.fromJson(request.getReader(), JsonObject.class);
+            String imageCode = requestBody.get("captcha").getAsString();
+            String codeId = requestBody.get("captchaID").getAsString();
             try {
                 validateImageCode(imageCode, codeId);
+                request.setAttribute("username", requestBody.get("username").getAsString());
+                request.setAttribute("password", requestBody.get("password").getAsString());
             } catch (IdentityAuthException e) {
                 authenticationEntryPoint.commence(request, response, e);
                 return;

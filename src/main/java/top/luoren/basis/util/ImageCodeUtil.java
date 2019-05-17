@@ -16,7 +16,7 @@ public class ImageCodeUtil {
     private static int height = 40;
     private static int codeCount = 5;
     private static int lineCount = 20;
-    private static int expireIn=300;
+    private static int expireIn=600;
     private static String code = null;
     private static Random random=new Random();
 

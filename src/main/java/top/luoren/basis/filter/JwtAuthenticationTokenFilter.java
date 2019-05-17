@@ -44,9 +44,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             authenticationEntryPoint.commence(httpServletRequest, httpServletResponse, e);
             return;
         }
+        String username = tokenUtil.getUsernameFromToken(token);
 
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = tokenUtil.getUsernameFromToken(token);
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
@@ -61,7 +61,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private void validateToken(String token) {
         if (StringUtils.isEmpty(token)) {
-            throw new IdentityAuthException("token 不存在");
+            return;
         }
         if (tokenUtil.getUsernameFromToken(token) == null) {
             throw new IdentityAuthException("无效的token");
